@@ -13,4 +13,4 @@ As a first approach I have been starting from the observation that sounds like w
 
 The current code takes some audio samples and calculates the complexity of the signal defined as:
 
-![equation](http://latex.codecogs.com/gif.latex?%5Csum_%7Bt%3D1%7D%5E%7Bn%7D%20%5Cleft%20%7C%20s(t)-s(t-1)%5Cright%20%7C)
+![equation](http://latex.codecogs.com/gif.latex?c%3D%20%5Csum_%7Bt%3D1%7D%5E%7Bn%7D%20%5Cleft%20%7C%20s(t)-s(t-1)%5Cright%20%7C)
