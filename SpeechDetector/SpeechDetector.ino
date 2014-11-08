@@ -19,11 +19,11 @@
 
 #define AMP_PWR_PIN A3
 
-#define SAMPLES_BUFFER_SIZE 32
+#define SAMPLES_BUFFER_SIZE 16
 
 #define COMPLEXITY_FILTER_LEN 6
 
-#define FINGERPRINT_SIZE 64
+#define FINGERPRINT_SIZE 128
 
 void setup()
 {
@@ -140,17 +140,6 @@ byte getVoiceFingerprint()
       }
       complexity=complexity/(totalEnergy/SAMPLES_BUFFER_SIZE);
       
-      if(maxEnergy<40)
-      {
-        if(millis()-lastUtteranceTime>1500)
-        {
-          return fingerprintIndex;
-        }
-        continue; 
-      }
-      
-      lastUtteranceTime = millis();
-      
       complexityFilter[complexityFilterIndex]=complexity;
       complexityFilterIndex=(complexityFilterIndex+1)%COMPLEXITY_FILTER_LEN;
       
@@ -160,6 +149,17 @@ byte getVoiceFingerprint()
         filteredComplexity+=complexityFilter[ix]; 
       }
       filteredComplexity=filteredComplexity/COMPLEXITY_FILTER_LEN;
+      
+      if(maxEnergy<40)
+      {
+        if(millis()-lastUtteranceTime>500)
+        {
+          return fingerprintIndex;
+        }
+        continue; 
+      }
+      
+      lastUtteranceTime = millis();
       
       if(lastComplexity==0 || abs(lastComplexity-filteredComplexity)>0)
       {
