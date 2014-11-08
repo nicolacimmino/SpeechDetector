@@ -13,7 +13,7 @@ As a first approach I have been starting from the observation that sounds like w
 
 The current code takes some audio samples and calculates the complexity of the signal defined as:
 
-![equation](http://latex.codecogs.com/gif.latex?c%3D%20%5Cfrac%7B%5Csum_%7Bt%3D1%7D%5E%7Bn%7D%20%5Cleft%20%7C%20s(t)-s(t-1)%5Cright%20%7C%7D%7B%5Cfrac%7B1%7D%7Bn%7D%5Csum_%7Bt%3D0%7D%5E%7Bn%7Ds(t))%7D)
+![equation](http://latex.codecogs.com/gif.latex?c%3D%20%5Cfrac%7B%5Csum_%7Bt%3D1%7D%5E%7Bn%7D%20%5Cleft%20%7C%20s(t)-s(t-1)%5Cright%20%7C%7D%7B%5Cfrac%7B1%7D%7Bn%7D%5Csum_%7Bt%3D0%7D%5E%7Bn%7Ds(t)%20)%7D)
 
 The numerator expresses the total amount of change while the denominator expresses the average sample amplitude. Without this term the complexity result would depend on the amplitude of the signal. This is a very simple way to calculate complexity and doesn't keep into account many things. It's a startig point anyway.
 
