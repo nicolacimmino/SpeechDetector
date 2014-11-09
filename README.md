@@ -6,6 +6,8 @@ The hardware is a very simple board I used in many other my DSP projects, just a
 
 ![Proto](documentation/proto.png)
 
+You can see the current version in action here: https://www.youtube.com/watch?v=vhyUyqc152Q
+
 Alghorithm
 =============
 
