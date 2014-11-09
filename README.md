@@ -25,7 +25,7 @@ The graph below shows a overview of what the word "rosso" that I used for tests 
 
 ![Graph](documentation/rosso.png)
 
-This is the area between the "o" and the "s" and shows in greater detail the huge difference in complexity of the two phonemens:
+This is the area between the "o" and the "s" and shows in greater detail the huge difference in complexity of the two phonemes:
 
 ![Graph](documentation/os.png)
 
