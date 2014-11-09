@@ -41,3 +41,5 @@ To do in future, in random order and not pondered very much:
 
 * Add a short IIR bandpass filter to isolate better voice and enhance SNR
 * Change the current complexity filter to one with lower insertion delay
+* Use Shannon to calculate better complexity
+
