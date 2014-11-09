@@ -4,4 +4,23 @@ I am hoping anyway to be able to at least recognize one of few words after the d
 
 The hardware is a very simple board I used in many other my DSP projects, just an Arduino Nano with a microphone and a pre-amp.
 
+![Proto](documentation/proto.png)
+
+Alghorithm
+=============
+
+As a first approach I have been starting from the observation that sounds like wovels have a lower complexity than other sounds and, in particular, fricative consonants. Fricatives are emitted passing air through an occlusion in the oral cavity and are very rich in harmonic content, while wovels are nearly pure tones. This idea is not completely new, similar work has been done in uSpeech (https://github.com/arjo129/uSpeech).
+
+The current code takes some audio samples and calculates the complexity of the signal defined as:
+
+![equation](http://latex.codecogs.com/gif.latex?c%3D%20%5Cfrac%7B%5Csum_%7Bt%3D1%7D%5E%7Bn%7D%20%5Cleft%20%7C%20s(t)-s(t-1)%5Cright%20%7C%7D%7B%5Cfrac%7B%5Csum_%7Bt%3D0%7D%5E%7Bn%7Ds(t)%7D%7Bn%7D%7D)
+
+The numerator expresses the total amount of change while the denominator expresses the average sample amplitude. Without this term the complexity result would depend on the amplitude of the signal. This is a very simple way to calculate complexity and doesn't keep into account many things. It's a startig point anyway.
+
+With the above I have got clear distinction between wovels (with values of complexity well below 10) and fricatives (e.g. sh, ch) with values in the order of 40 to 50. There are also values in the middle but in now way they seem to be enough to actually recognize other letters. 
+
+My current assumption is that I will need to analyze different aspects and combine them. For instance signal amplitude envelope could help to identify plosives, but this is just speculation at this point.
+
+With the above in mindI made a very simple first test in which I collect the fingerprint of two spoken words and then keep sampling and measure correlation of the current fingerprint and the two sampled ones assuming the spoken word is the one with the highest correlation. This works surprisingly quite well if the words are chosen wisely and, in particular, one should abound in wowels and the other in fricatives. So I made a test with "rosso" and "verde", two italian words for "red" and "green" as they were giving the best results. I am sure there are a couple of english words that work as well, but these came handy as I have red and green LEDs sitting in my drawer so I plan to make them flick with voice.
+
 
