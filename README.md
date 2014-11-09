@@ -21,6 +21,14 @@ The numerator expresses the total amount of change while the denominator express
 
 With the above I have got clear distinction between wovels (with values of complexity well below 10) and fricatives (e.g. sh, ch) with values in the order of 40 to 50. There are also values in the middle but in now way they seem to be enough to actually recognize other letters. 
 
+The graph below shows a overview of what the word "rosso" that I used for tests looks like in time domain. As you see the wowels have a much less change than the fricative consonant (the 's'):
+
+![Graph](documentation/rosso.png)
+
+This is the area between the "o" and the "s" and shows in greater detail the huge difference in complexity of the two phonemens:
+
+![Graph](documentation/os.png)
+
 My current assumption is that I will need to analyze different aspects and combine them. For instance signal amplitude envelope could help to identify plosives, but this is just speculation at this point.
 
 With the above in mind I made a very simple first test in which I collect the fingerprint of two spoken words and then keep sampling and measure correlation of the current fingerprint and the two sampled ones assuming the spoken word is the one with the highest correlation. This works surprisingly quite well if the words are chosen wisely and, in particular, one should abound in wowels and the other in fricatives. So I made a test with "rosso" and "verde", two italian words for "red" and "green" as they were giving the best results. I am sure there are a couple of english words that work as well, but these came handy as I have red and green LEDs sitting in my drawer so I plan to make them flick with voice.
