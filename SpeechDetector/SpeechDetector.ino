@@ -17,13 +17,17 @@
 //
 #define AUDIO_IN_PIN A0
 
+#define LED_GREEN_PIN 2
+
+#define LED_RED_PIN 3
+
 #define AMP_PWR_PIN A3
 
 #define SAMPLES_BUFFER_SIZE 16
 
 #define COMPLEXITY_FILTER_LEN 6
 
-#define FINGERPRINT_SIZE 128
+#define MAX_FINGERPRINT_SIZE 128
 
 void setup()
 {
@@ -31,6 +35,11 @@ void setup()
   pinMode(AUDIO_IN_PIN, INPUT);
   pinMode(AMP_PWR_PIN,OUTPUT);
   digitalWrite(AMP_PWR_PIN, HIGH);
+  
+  pinMode(LED_GREEN_PIN, OUTPUT);
+  pinMode(LED_RED_PIN, OUTPUT);
+  digitalWrite(LED_GREEN_PIN, LOW);
+  digitalWrite(LED_RED_PIN, LOW);
   
   // This sets the ADC analog reference to internally
   //  generated 1.1V to increase A/D resolution.
@@ -47,11 +56,11 @@ long lastUtteranceTime = 0;
 
 char lastPhoneme='\0';
 
-byte referenceFingerprint_a[FINGERPRINT_SIZE];
+byte referenceFingerprint_a[MAX_FINGERPRINT_SIZE];
 
-byte referenceFingerprint_b[FINGERPRINT_SIZE];
+byte referenceFingerprint_b[MAX_FINGERPRINT_SIZE];
 
-byte fingerprint[FINGERPRINT_SIZE];
+byte fingerprint[MAX_FINGERPRINT_SIZE];
 
 byte fingerprintLength_a = 0;
 
@@ -59,7 +68,7 @@ byte fingerprintLength_b = 0;
 
 void loop()
 {
-    delay(15000);
+    delay(2000);
     Serial.println("Learning....");
     fingerprintLength_a = getVoiceFingerprint();
     memcpy(referenceFingerprint_a, fingerprint, fingerprintLength_a);
@@ -95,6 +104,11 @@ void loop()
       Serial.print(correlation_a);
       Serial.print(" ");
       Serial.println(correlation_b);
+      
+      digitalWrite((correlation_a<correlation_b)?LED_RED_PIN:LED_GREEN_PIN, HIGH);
+      delay(500);
+      digitalWrite((correlation_a<correlation_b)?LED_RED_PIN:LED_GREEN_PIN, LOW);
+  
     } 
 }
 
@@ -106,49 +120,26 @@ int averageInputLevel()
     inputLevel += analogRead(AUDIO_IN_PIN);
   }
   inputLevel=inputLevel/SAMPLES_BUFFER_SIZE;
-  
   return inputLevel;
 }
 
 byte getVoiceFingerprint()
 {
-    while(averageInputLevel()<60);
+    while(averageInputLevel()<100)
+    {
+      delay(10);
+    }
     
     byte fingerprintIndex=0;
     int lastComplexity=0;
     lastUtteranceTime=millis();
     while(true)
     {
-      // Sample 
-      for(int ix=0;ix<SAMPLES_BUFFER_SIZE;ix++)
-      {
-        samplesBuffer[ix] = analogRead(AUDIO_IN_PIN);
-      }
+      int maxEnergy=sampleAudio();
       
-      // Evaluate complexity
-      int complexity=0;
-      uint64_t totalEnergy=0;
-      int maxEnergy=0;
-      for(int ix=1;ix<SAMPLES_BUFFER_SIZE;ix++)
-      {
-        complexity+=abs(samplesBuffer[ix]-samplesBuffer[ix-1]);
-        totalEnergy+=samplesBuffer[ix];
-        if(samplesBuffer[ix]>maxEnergy)
-        {
-          maxEnergy=samplesBuffer[ix];
-        }
-      }
-      complexity=complexity/(totalEnergy/SAMPLES_BUFFER_SIZE);
+      int complexity=calculateComplexity();
       
-      complexityFilter[complexityFilterIndex]=complexity;
-      complexityFilterIndex=(complexityFilterIndex+1)%COMPLEXITY_FILTER_LEN;
-      
-      int filteredComplexity=0;
-      for(int ix=0;ix<COMPLEXITY_FILTER_LEN;ix++)
-      {
-        filteredComplexity+=complexityFilter[ix]; 
-      }
-      filteredComplexity=filteredComplexity/COMPLEXITY_FILTER_LEN;
+      complexity = filterComplexity(complexity);
       
       if(maxEnergy<40)
       {
@@ -161,15 +152,58 @@ byte getVoiceFingerprint()
       
       lastUtteranceTime = millis();
       
-      if(lastComplexity==0 || abs(lastComplexity-filteredComplexity)>0)
+      lastComplexity=complexity;
+      fingerprint[fingerprintIndex]=complexity;
+      fingerprintIndex++;
+      if(fingerprintIndex==MAX_FINGERPRINT_SIZE)
       {
-        lastComplexity=filteredComplexity;
-        fingerprint[fingerprintIndex]=filteredComplexity;
-        fingerprintIndex++;
-        if(fingerprintIndex==FINGERPRINT_SIZE)
-        {
-          return fingerprintIndex;  
-        }
+        return fingerprintIndex;  
       }
    }  
+}
+
+
+int sampleAudio()
+{
+  // Sample 
+  int maxEnergy=0;
+  for(int ix=0;ix<SAMPLES_BUFFER_SIZE;ix++)
+  {
+    samplesBuffer[ix] = analogRead(AUDIO_IN_PIN);
+    if(samplesBuffer[ix]>maxEnergy)
+    {
+      maxEnergy=samplesBuffer[ix];
+    }
+  } 
+  return maxEnergy;
+}
+
+int calculateComplexity()
+{
+  // Evaluate complexity
+  int complexity=0;
+  uint64_t totalEnergy=0;
+  for(int ix=1;ix<SAMPLES_BUFFER_SIZE;ix++)
+  {
+    complexity+=abs(samplesBuffer[ix]-samplesBuffer[ix-1]);
+    totalEnergy+=samplesBuffer[ix];
+  }
+  complexity=complexity/(totalEnergy/SAMPLES_BUFFER_SIZE);  
+  
+  return complexity;
+}
+
+int filterComplexity(int complexity)
+{
+  complexityFilter[complexityFilterIndex]=complexity;
+  complexityFilterIndex=(complexityFilterIndex+1)%COMPLEXITY_FILTER_LEN;
+  
+  int filteredComplexity=0;
+  for(int ix=0;ix<COMPLEXITY_FILTER_LEN;ix++)
+  {
+    filteredComplexity+=complexityFilter[ix]; 
+  }
+  filteredComplexity=filteredComplexity/COMPLEXITY_FILTER_LEN;
+  
+  return filteredComplexity;
 }
